@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://streamflow.di.unito.it/schemas/deployment/connector/pyvenv.json",
+  "type": "object",
+  "$ref": "base/queue_manager.json",
+  "properties": {
+    "path": {
+      "type": "string",
+      "title": "Virtual Environment Path",
+      "description": "Path to the Python virtual environment to use.",
+      "default": "/tmp/streamflow-venv"
+    },
+    "random-suffix": {
+      "type": "boolean",
+      "title": "Create Random Suffix",
+      "description": "Whether to create a random suffix for the virtual environment directory to avoid conflicts.",
+      "default": true
+    },
+    "force-install": {
+      "type": "boolean",
+      "title": "Force Install",
+      "description": "Whether to force the installation of the dependencies, even if the venv already exists.",
+      "default": false
+    },
+    "keep-venv": {
+      "type": "boolean",
+      "title": "Keep Virtual Environment",
+      "description": "Whether to keep the virtual environment after the workflow execution.",
+      "default": false
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Requirements",
+      "description": "Path to the requirements.txt file for the virtual environment.",
+      "default": []
+    }
+  },
+  "unevaluatedProperties": false
+}

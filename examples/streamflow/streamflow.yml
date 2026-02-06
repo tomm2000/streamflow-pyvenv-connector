@@ -1,0 +1,48 @@
+version: v1.0
+workflows:
+  master:
+    type: cwl
+    config:
+      file: main.cwl
+      settings: inputs.yml
+    bindings:
+      - step: /step1
+        target:
+          deployment: local-deploy
+      - step: /step2_1
+        target:
+          deployment: venv-deploy
+      - step: /step2_2
+        target:
+          deployment: venv-deploy
+      - step: /step2_3
+        target:
+          deployment: venv-deploy
+      - step: /step3
+        target:
+          deployment: local-deploy
+
+deployments:
+  local-deploy:
+    type: local
+    config: {}
+
+  venv-deploy:
+    type: pyvenv
+    wraps: ssh
+    config:
+      # path: /mnt/shared/tfogliobonda/tmp
+      # random-suffix: false
+      force-install: true
+      keep-venv: true
+      requirements:
+        - cowsay
+
+  ssh:
+    type: ssh
+    config:
+      nodes:
+        - 130.192.212.129
+      username: tfogliobonda
+      sshKey: ~/.ssh/unito/hpc
+      checkHostKey: false
