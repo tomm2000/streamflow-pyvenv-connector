@@ -31,8 +31,8 @@ deployments:
     type: pyvenv
     wraps: ssh
     config:
-      # path: /mnt/shared/tfogliobonda/tmp
-      # random-suffix: false
+      path: /mnt/shared/tfogliobonda/tmp
+      random-suffix: false
       force-install: true
       keep-venv: true
       requirements:
