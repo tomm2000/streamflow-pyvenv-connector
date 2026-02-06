@@ -1,4 +1,4 @@
-# SLURM Python Virtual Environment Plugin for StreamFlow
+# Python Virtual Environment Plugin for StreamFlow
 
 ## Installation 
 <!-- **NOTE: not published on PyPI yet.**
