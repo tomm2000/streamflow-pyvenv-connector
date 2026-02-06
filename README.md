@@ -1,4 +1,4 @@
-# SLURM REST API Plugin for StreamFlow
+# SLURM Python Virtual Environment Plugin for StreamFlow
 
 ## Installation 
 <!-- **NOTE: not published on PyPI yet.**
