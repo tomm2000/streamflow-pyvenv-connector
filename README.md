@@ -1,4 +1,4 @@
-# SLURM REST API Plugin for StreamFlow
+# Python Virtual Environment Plugin for StreamFlow
 
 ## Installation 
 <!-- **NOTE: not published on PyPI yet.**
@@ -27,7 +27,7 @@ deployments:
   pyvenv-deployment:
     type: pyvenv
     config:
-      path: /mnt/shared/tfogliobonda/tmp # path where the virtual environment will be created, optional, default is /tmp/streamflow-venv
+      path: /mnt/shared/tfogliobonda/tmp # path where the virtual environment will be located (or created if not found), optional, default is /tmp/streamflow-venv
       random-suffix: false # whether to add a random suffix to the virtual environment name, optional, default is true
       force-install: true # whether to force dependecy installation even if the virtual environment already exists, optional, default is false
       keep-venv: true # whether to keep the virtual environment after the workflow execution, optional, default is false
