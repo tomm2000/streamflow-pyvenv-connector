@@ -23,4 +23,6 @@ outputs:
 stdout: stdout.txt
 
 arguments:
-  - valueFrom: "python3 -c \"import cowsay; print('cowsay imported successfully')\" || echo 'cowsay NOT found'"
+  # - valueFrom: "python3 -c \"import cowsay; print('cowsay imported successfully')\" || echo 'cowsay NOT found'"
+  # - valueFrom: "sleep 1; cat /home/tommo/Coding/ALPHA/streamflow-venv-connector/bandit-requirements.txt"
+  - valueFrom: "sleep 1; which python3"

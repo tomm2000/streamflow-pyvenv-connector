@@ -27,22 +27,34 @@ deployments:
     type: local
     config: {}
 
+  ssh-deploy:
+    type: ssh
+    workdir: /beegfs/home/tommaso.fogliobonda/tmp/streamflow
+    config:
+      nodes:
+        - c3sfr1.di.unito.it
+      username: tommaso.fogliobonda
+      sshKey: ~/.ssh/unito/hpc
+      checkHostKey: false
+
+  slurm-deploy:
+    type: slurm
+    wraps: ssh-deploy
+    workdir: /beegfs/home/tommaso.fogliobonda/tmp/streamflow
+    config:
+      services:
+        broadwell:
+          partition: broadwell
+
   venv-deploy:
     type: pyvenv
-    wraps: ssh
+    wraps: 
+      deployment: slurm-deploy
+      service: broadwell
     config:
-      path: /mnt/shared/tfogliobonda/tmp
+      path: /beegfs/home/tommaso.fogliobonda/tmp/1000genome-venv
       random-suffix: false
       force-install: true
       keep-venv: true
       requirements:
         - cowsay
-
-  ssh:
-    type: ssh
-    config:
-      nodes:
-        - 130.192.212.129
-      username: tfogliobonda
-      sshKey: ~/.ssh/unito/hpc
-      checkHostKey: false

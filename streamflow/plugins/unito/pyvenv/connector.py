@@ -1,25 +1,15 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import os
-import shlex
-from collections.abc import Collection, MutableMapping, MutableSequence
-from functools import partial
+from collections.abc import MutableMapping, MutableSequence
 from importlib.resources import files
-import subprocess
-from typing import Any, cast
+from typing import Any
 import uuid
-import requests
-from streamflow.core import utils
 
-import cachetools
 
-from streamflow.core.asyncache import cachedmethod
 from streamflow.core.deployment import ExecutionLocation
-from streamflow.deployment.connector.base import BaseConnector
-from streamflow.deployment.connector.local import LocalConnector
 from streamflow.deployment.wrapper import ConnectorWrapper
 from streamflow.log_handler import logger
 from streamflow.core.exception import WorkflowDefinitionException
@@ -32,7 +22,6 @@ EXCLUDED_CONNECTOR_PARAMETERS = [
     "keep-venv",
     "force-install",
 ]
-
 
 class PyVenvConnector(ConnectorWrapper):
     @classmethod
@@ -118,7 +107,7 @@ class PyVenvConnector(ConnectorWrapper):
     async def _create_venv(self, location: ExecutionLocation) -> None:
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"PyVenvConnector: Creating virtual environment at {self.venv_path}")
-        await self.connector.run(
+        out = await self.connector.run(
             location=location,
             command=[
                 "python3",
@@ -126,7 +115,33 @@ class PyVenvConnector(ConnectorWrapper):
                 "venv",
                 self.venv_path,
             ],
+            capture_output=True,
         )
+
+        assert out is not None, "Expected output from command, got None"
+        stderr, code = out
+
+        if code != 0:
+            raise WorkflowDefinitionException(
+                f"Failed to create virtual environment at {self.venv_path}. "
+                f"Command exited with code {code}. {stderr}"
+            )
+
+        # test if the venv was created successfully
+        out = await self.connector.run(
+            location=location,
+            command=["test", "-d", self.venv_path, "&&", "test", "-f", os.path.join(self.venv_path, "bin", "activate")],
+            capture_output=True,
+        )
+
+        assert out is not None, "Expected output from command, got None"
+        _, code = out
+
+        if code != 0:
+            raise WorkflowDefinitionException(
+                f"Failed to create virtual environment at {self.venv_path}. "
+                f"Command exited with code {code}."
+            )
 
     async def _install_requirements(self, location: ExecutionLocation) -> None:
         for requirement in self.requirements:
@@ -166,13 +181,22 @@ class PyVenvConnector(ConnectorWrapper):
         timeout: int | None = None,
         job_name: str | None = None,
     ) -> tuple[str, int] | None:
-        if environment is None:
-            environment = os.environ.copy()
 
-        venv_bin = os.path.join(self.venv_path, "bin")
-        environment["VIRTUAL_ENV"] = self.venv_path
-        environment["PATH"] = venv_bin + os.pathsep + environment.get("PATH", "")
-        environment.pop("PYTHONHOME", None)
+        if environment is None:
+            environment = {}
+
+        path = [
+            os.path.join(self.venv_path, "bin"),
+            "$PATH",
+        ]
+
+        if environment.get("PATH", None) is not None:
+            path.append(environment["PATH"])
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"PyVenvConnector: Running command with PATH: {os.pathsep.join(path)}")
+
+        environment["PATH"] = os.pathsep.join(path)
 
         return await super().run(
             location=location,

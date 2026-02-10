@@ -1,0 +1,45 @@
+version: v1.0
+
+workflows:
+  genome:
+    type: cwl
+    config:
+      file: main.cwl
+      settings: config.yml
+    bindings:
+      - step: /
+        target:
+          deployment: venv-deploy
+
+deployments:
+  ssh-deploy:
+    type: ssh
+    workdir: /beegfs/home/tommaso.fogliobonda/tmp/streamflow
+    config:
+      nodes:
+        - c3sfr1.di.unito.it
+      username: tommaso.fogliobonda
+      sshKey: ~/.ssh/unito/hpc
+      checkHostKey: false
+
+  slurm-deploy:
+    type: slurm
+    wraps: ssh-deploy
+    workdir: /beegfs/home/tommaso.fogliobonda/tmp/streamflow
+    config:
+      services:
+        broadwell:
+          partition: broadwell
+
+  venv-deploy:
+    type: pyvenv
+    wraps: 
+      deployment: slurm-deploy
+      service: broadwell
+    config:
+      path: /beegfs/home/tommaso.fogliobonda/tmp/1000genome-venv
+      random-suffix: false
+      force-install: true
+      keep-venv: true
+      requirements:
+        - cowsay
